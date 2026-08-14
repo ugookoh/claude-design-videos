@@ -3,3 +3,4 @@ temp/
 output/
 dist/
 project.json
+.DS_STORE
