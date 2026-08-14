@@ -30,14 +30,15 @@ const TRUTH_LINES = [
   ['by round.', 170],
 ];
 
+// Keyed overlay: the card is NEVER faded and NEVER blurred as a whole — either
+// would mix the green background into its pixels and leave a green ghost after
+// the key. It enters by sliding in solid from beyond the right edge instead.
 function Panel({ children, inP }) {
   return (
     <div style={{
       width: 660,
-      opacity: clamp(inP * 1.7, 0, 1),
-      transform: `translateX(${interpolate([0, 1], [110, 0])(inP)}px) perspective(1800px) rotateY(${interpolate([0, 1], [-16, -3.2])(inP)}deg)`,
+      transform: `translateX(${interpolate([0, 1], [780, 0])(inP)}px) perspective(1800px) rotateY(${interpolate([0, 1], [-13, -3.2])(inP)}deg)`,
       transformOrigin: '100% 50%',
-      filter: `blur(${(1 - inP) * 14}px)`,
     }}>
       <div style={{
         background: PANEL, border: `1px solid ${HAIR}`, borderRadius: 22,
@@ -153,18 +154,17 @@ function CheckList({ ticks }) {
 }
 
 function Stamp({ p }) {
-  if (p <= 0) return null;
-  const press = interpolate([0, 1], [1.5, 1])(p);
+  const press = interpolate([0, 1], [1.06, 1])(p);
   const settle = 1 + Math.max(0, 1 - p / 0.35) * 0.0;
   return (
+    <div style={{ height: 78, flex: '0 0 auto', display: 'grid', placeItems: 'stretch', overflow: 'hidden', borderRadius: 16 }}>
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
-      background: AMBER, borderRadius: 16, padding: '22px 26px',
-      opacity: clamp(p * 3, 0, 1),
+      background: p <= 0 ? 'transparent' : AMBER, borderRadius: 16, padding: '22px 26px',
+      boxSizing: 'border-box', height: 78,
       transform: `scale(${press * settle}) rotate(${interpolate([0, 1], [-4, -1.2])(p)}deg)`,
-      filter: `blur(${Math.max(0, 1 - p * 4) * 6}px)`,
     }}>
-      <svg width="34" height="34" viewBox="0 0 22 22" style={{ display: 'block', flex: '0 0 auto' }}>
+      <svg width="34" height="34" viewBox="0 0 22 22" style={{ display: p <= 0 ? 'none' : 'block', flex: '0 0 auto' }}>
         <path d="M4 11.5 L9 16.5 L18 6.5" fill="none" stroke="oklch(0.19 0.03 76)" strokeWidth="3.4"
           strokeLinecap="round" strokeLinejoin="round"
           strokeDasharray="26" strokeDashoffset={26 - clamp((p - 0.2) / 0.4, 0, 1) * 26} />
@@ -172,7 +172,9 @@ function Stamp({ p }) {
       <div style={{
         fontFamily: MONO, fontSize: 27, letterSpacing: '0.16em', textTransform: 'uppercase',
         fontWeight: 700, color: 'oklch(0.19 0.03 76)', whiteSpace: 'nowrap',
+        display: p <= 0 ? 'none' : 'block',
       }}>Pass · first attempt</div>
+    </div>
     </div>
   );
 }

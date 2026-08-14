@@ -41,7 +41,8 @@ function ThumbCard({ T, start, popAt, img, kicker, title, meta, duration, progre
   const pulse = MOTION.pop(T, popAt);
   const dir = side === 'left' ? 1 : -1;
 
-  const ty = interpolate([0, 1], [180, 0])(p) + d.y * p;
+  // enters from fully off-frame so it never has to fade in over the key
+  const ty = interpolate([0, 1], [900, 0])(p) + d.y * p;
   const tiltY = dir * interpolate([0, 1], [20, 6])(p);
   const tiltZ = -dir * (interpolate([0, 1], [8, 2.6])(p) + d.rot);
   const scale = interpolate([0, 1], [0.86, 1])(s) * (1 + pulse * 0.03);
@@ -49,18 +50,14 @@ function ThumbCard({ T, start, popAt, img, kicker, title, meta, duration, progre
   return (
     <div style={{
       width: 580,
-      opacity: clamp(p * 1.6, 0, 1),
       transform: `translateY(${ty}px) perspective(1500px) rotateY(${tiltY}deg) rotate(${tiltZ}deg) scale(${scale})`,
       transformOrigin: side === 'left' ? '100% 85%' : '0% 85%',
-      filter: `blur(${(1 - p) * 16}px)`,
     }}>
       <div style={{
         background: 'oklch(0.17 0.008 60)',
-        border: `1px solid ${pulse > 0.02 ? ACCENT : 'oklch(0.30 0.011 60)'}`,
+        border: `${1 + Math.round(pulse * 2)}px solid ${pulse > 0.02 ? ACCENT : 'oklch(0.30 0.011 60)'}`,
         borderRadius: 18, padding: 14,
         boxShadow: `0 1px 0 oklch(1 0 0 / 0.05) inset`,
-        outline: pulse > 0.02 ? `${pulse * 3}px solid oklch(0.78 0.15 75 / ${0.25 + pulse * 0.55})` : 'none',
-        outlineOffset: 0,
       }}>
         <div style={{
           position: 'relative', width: 552, height: 310, borderRadius: 12, overflow: 'hidden',
@@ -119,6 +116,8 @@ function ThumbCard({ T, start, popAt, img, kicker, title, meta, duration, progre
 function ThumbBroll(props) {
   const { T, CUES } = useComposition();
 
+  // authored in 1920x1080 units, scaled 2x onto the 3840x2160 stage (text and
+  // chrome stay vector-sharp at 4K)
   return (
     <div style={{
       position: 'absolute', left: 0, top: 0, width: 1920, height: 1080,
